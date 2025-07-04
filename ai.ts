@@ -20,7 +20,7 @@ type DynamicNeuron = NeuronExecutions[];
 type StaticNeuron =
     (...execute: any[]) => any;
 
-type InputRedirecNeurons = StaticNeuron[];
+type InputRedirectNeurons = StaticNeuron[];
 type OutputRedirectNeurons = StaticNeuron[];
 type CRUDNeurons = StaticNeuron[];
 type MathNeurons = StaticNeuron[];
@@ -28,7 +28,7 @@ type SystemNeurons = StaticNeuron[];
 type StorageNeurons = StaticNeuron[];
 
 type StaticNeurons = [
-    InputRedirecNeurons,
+    InputRedirectNeurons,
     OutputRedirectNeurons,
     CRUDNeurons,
     MathNeurons,
