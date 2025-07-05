@@ -1,21 +1,46 @@
 // Estrutura base para o projeto NeuroForma 3D
-import process from 'node:process';
+import process from 'process';
 
 export const globalMemory = Array<any>();
 export const neuronMemory = Array<any>();
 
+type ParamType = 0 | 1 | 2 | 3 | 4; // 0=valor, 1= param, 2=variável, 3=neurônio estático, 4=neurônio dinâmico
+
+type ExecutionType = 0 | 1 | 2 | 3; // 0=sequencial, 1=paralela esperando por todos, 2=paralela esperando pelo primeiro, 3=paralela sem esperar
+
+//(index)(params: Param[]){
+//     NeuronExecutions[] // Parâmetros de entrada do
+// }
+
+type StaticNeuronIndex = [0, number,number];
+
+type DynamicNeuronIndex = [1, number,number,number];
+
+type NeuronIndex = StaticNeuronIndex | DynamicNeuronIndex; // Índice do neurônio: estático ou dinâmico,
+
+type Param = [
+    ParamType, // Tipo de parâmetro: 0=valor, 1=variável (valor em memoria), 2=neurônio estático, 3=neurônio dinâmico
+    number | any, // Índices do neurônio ou do valor em memoria ou valor
+]
+
 type NeuronExecution = [
-    0 | 1 | 2 | 3, // Tipo de parâmetro: 0=valor, 1=variável, 2=neurônio estático, 3=neurônio dinâmico
-    number[], // Índices do neurônio
-    NeuronExecution[] // Parâmetros de entrada do neurônio
+    NeuronIndex, // Índices do neurônio
+    Param[], // Parâmetros de entrada do neurônio
+    number, // Index da memória do neurônio
 ]
 
 type NeuronExecutions = [
-    number, // Tipo de execução: 0=sequencial, 1=paralela esperando por todos, 2=paralela esperando pelo primeiro, 3=paralela sem esperar
+    ExecutionType,
     NeuronExecution[] // Array de execuções de neurônios
 ]
 
-type DynamicNeuron = NeuronExecutions[];
+type ParamDefinition = any // Valor padrão do parâmetro
+
+
+type DynamicNeuron = [
+    ParamDefinition[],
+    NeuronExecutions[],
+]
 
 type StaticNeuron =
     (...execute: any[]) => any;
@@ -27,15 +52,6 @@ type MathNeurons = StaticNeuron[];
 type SystemNeurons = StaticNeuron[];
 type StorageNeurons = StaticNeuron[];
 
-type StaticNeurons = [
-    InputRedirectNeurons,
-    OutputRedirectNeurons,
-    CRUDNeurons,
-    MathNeurons,
-    SystemNeurons,
-    StorageNeurons
-];
-
 type InputNeurons = [
     // Neurônios de entrada dinâmicos
     DynamicNeuron[], // Neurônios de imagem
@@ -45,6 +61,15 @@ type InputNeurons = [
 ];
 
 type DynamicExecutionNeurons = DynamicNeuron[][]
+
+type StaticNeurons = [
+    InputRedirectNeurons,
+    OutputRedirectNeurons,
+    CRUDNeurons,
+    MathNeurons,
+    SystemNeurons,
+    StorageNeurons
+];
 
 type DynamicNeurons = [
     InputNeurons, // Neurônios de entrada dinâmicos
@@ -208,6 +233,55 @@ export const neurons: Neurons = [
         ],
     ],
 ];
+
+function generateRandomNeuronExecution(): NeuronExecution {
+    return [
+        0, // Tipo de parâmetro: valor
+        [0, 1], // Índices do neurônio
+        [] // Parâmetros de entrada vazios
+    ];
+}
+
+function generateRandomNeuronExecutions(): NeuronExecutions {
+    return [
+        generateRandomNaturalNumber(3) as ExecutionType, // Tipo de execução: sequencial, paralela esperando por todos, etc.
+        Array.from({ length }, () => generateRandomNeuronExecution())
+    ];
+}
+
+function generateRandomNaturalNumber(max = 100000000000000): number {
+    const value = Math.floor(Math.random() * max);
+    return value < 0 ? 0 : value; // Garantir que o número seja natural (não negativo)
+}
+
+function generateRandomNumber(): number {
+    // genertae a random value between -infinite and infinite
+    const isInteger = Math.random() < 0.5;
+    const isNegative = Math.random() < 0.5;
+
+    let value;
+    if (isInteger) {
+        value = generateRandomNaturalNumber();
+        value = isNegative ? -value : value;
+    } else {
+        const max = 1e+308;
+        value = Math.random() * max;
+        value = isNegative ? -value : value;
+    }
+    return value;
+}
+
+function generateRandomArray(): number[] {
+    const length = generateRandomNaturalNumber();
+    return Array.from({ length }, () => generateRandomNumber());
+}
+
+function generateRandomDynamicNeuron(): DynamicNeuron {
+    return [
+        generateRandomArray(), // Tipo de execução: sequencial
+        Array.from({ length }, () => generateRandomNeuronExecutions())
+    ];
+}
 
 // 6. Simulação de execução
 (async () => {
